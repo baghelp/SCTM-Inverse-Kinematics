@@ -1,0 +1,704 @@
+%!PS-Adobe-3.0
+%%Title: LengthControllerYAML.cpp
+%%For: michael
+%%Creator: VIM - Vi IMproved 7.4 (2013 Aug 10)
+%%CreationDate: Thu Aug  3 08:54:23 2017
+%%DocumentData: Clean8Bit
+%%Orientation: Portrait
+%%Pages: (atend)
+%%PageOrder: Ascend
+%%BoundingBox: 61 42 577 752
+%%DocumentMedia: letter 612 792 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-Oblique
+%%+ font Courier-BoldOblique
+%%DocumentSuppliedResources: procset VIM-Prolog 1.4 1
+%%+ encoding VIM-latin1 1.0 0
+%%Requirements: duplex collate color
+%%EndComments
+%%BeginDefaults
+%%PageResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-Oblique
+%%+ font Courier-BoldOblique
+%%PageMedia: letter
+%%EndDefaults
+%%BeginProlog
+%%BeginResource: procset VIM-Prolog
+%%BeginDocument: /usr/share/vim/vim74/print/prolog.ps
+%!PS-Adobe-3.0 Resource-ProcSet
+%%Title: VIM-Prolog
+%%Version: 1.4 1
+%%EndComments
+% Editing of this file is NOT RECOMMENDED.  You run a very good risk of causing
+% all PostScript printing from VIM failing if you do.  PostScript is not called
+% a write-only language for nothing!
+/packedarray where not{userdict begin/setpacking/pop load def/currentpacking
+false def end}{pop}ifelse/CP currentpacking def true setpacking
+/bd{bind def}bind def/ld{load def}bd/ed{exch def}bd/d/def ld
+/db{dict begin}bd/cde{currentdict end}bd
+/T true d/F false d
+/SO null d/sv{/SO save d}bd/re{SO restore}bd
+/L2 systemdict/languagelevel 2 copy known{get exec}{pop pop 1}ifelse 2 ge d
+/m/moveto ld/s/show ld /ms{m s}bd /g/setgray ld/r/setrgbcolor ld/sp{showpage}bd
+/gs/gsave ld/gr/grestore ld/cp/currentpoint ld
+/ul{gs UW setlinewidth cp UO add 2 copy newpath m 3 1 roll add exch lineto
+stroke gr}bd
+/bg{gs r cp BO add 4 -2 roll rectfill gr}bd
+/sl{90 rotate 0 exch translate}bd
+L2{
+/sspd{mark exch{setpagedevice}stopped cleartomark}bd
+/nc{1 db/NumCopies ed cde sspd}bd
+/sps{3 db/Orientation ed[3 1 roll]/PageSize ed/ImagingBBox null d cde sspd}bd
+/dt{2 db/Tumble ed/Duplex ed cde sspd}bd
+/c{1 db/Collate ed cde sspd}bd
+}{
+/nc{/#copies ed}bd
+/sps{statusdict/setpage get exec}bd
+/dt{statusdict/settumble 2 copy known{get exec}{pop pop pop}ifelse
+statusdict/setduplexmode 2 copy known{get exec}{pop pop pop}ifelse}bd
+/c{pop}bd
+}ifelse
+/ffs{findfont exch scalefont d}bd/sf{setfont}bd
+/ref{1 db findfont dup maxlength dict/NFD ed{exch dup/FID ne{exch NFD 3 1 roll
+put}{pop pop}ifelse}forall/Encoding findresource dup length 256 eq{NFD/Encoding
+3 -1 roll put}{pop}ifelse NFD dup/FontType get 3 ne{/CharStrings}{/CharProcs}
+ifelse 2 copy known{2 copy get dup maxlength dict copy[/questiondown/space]{2
+copy known{2 copy get 2 index/.notdef 3 -1 roll put pop exit}if pop}forall put
+}{pop pop}ifelse dup NFD/FontName 3 -1 roll put NFD definefont pop end}bd
+CP setpacking
+(\004)cvn{}bd
+% vim:ff=unix:
+%%EOF
+%%EndDocument
+%%EndResource
+%%BeginResource: encoding VIM-latin1
+%%BeginDocument: /usr/share/vim/vim74/print/latin1.ps
+%!PS-Adobe-3.0 Resource-Encoding
+%%Title: VIM-latin1
+%%Version: 1.0 0
+%%EndComments
+/VIM-latin1[
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quotesingle
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash
+/zero /one /two /three /four /five /six /seven
+/eight /nine /colon /semicolon /less /equal /greater /question
+/at /A /B /C /D /E /F /G
+/H /I /J /K /L /M /N /O
+/P /Q /R /S /T /U /V /W
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore
+/grave /a /b /c /d /e /f /g
+/h /i /j /k /l /m /n /o
+/p /q /r /s /t /u /v /w
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /periodcentered
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis]
+/Encoding defineresource pop
+% vim:ff=unix:
+%%EOF
+%%EndDocument
+%%EndResource
+%%EndProlog
+%%BeginSetup
+612 792 0 sps
+1 nc
+T F dt
+T c
+%%IncludeResource: font Courier
+/_F0 /VIM-latin1 /Courier ref
+/F0 10 /_F0 ffs
+%%IncludeResource: font Courier-Bold
+/_F1 /VIM-latin1 /Courier-Bold ref
+/F1 10 /_F1 ffs
+%%IncludeResource: font Courier-Oblique
+/_F2 /VIM-latin1 /Courier-Oblique ref
+/F2 10 /_F2 ffs
+%%IncludeResource: font Courier-BoldOblique
+/_F3 /VIM-latin1 /Courier-BoldOblique ref
+/F3 10 /_F3 ffs
+/UO -1 d
+/UW 0.5 d
+/BO -2.5 d
+%%EndSetup
+%%Page: 1 1
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(LengthControllerYAML.cpp                                                        Page 1)61.2 744.9 ms
+F0 sf
+0.498 0.498 0 r
+(/*)61.2 724.9 ms
+( * Copyright © 2012, United States Government, as represented by the)61.2 714.9 ms
+( * Administrator of the National Aeronautics and Space Administration.)61.2 704.9 ms
+( * All rights reserved.)61.2 694.9 ms
+( * )61.2 684.9 ms
+( * The NASA Tensegrity Robotics Toolkit \(NTRT\) v1 platform is licensed)61.2 674.9 ms
+( * under the Apache License, Version 2.0 \(the "License"\);)61.2 664.9 ms
+( * you may not use this file except in compliance with the License.)61.2 654.9 ms
+( * You may obtain a copy of the License at)61.2 644.9 ms
+( * http://www.apache.org/licenses/LICENSE-2.0.)61.2 634.9 ms
+( * )61.2 624.9 ms
+( * Unless required by applicable law or agreed to in writing,)61.2 614.9 ms
+( * software distributed under the License is distributed on an)61.2 604.9 ms
+( * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,)61.2 594.9 ms
+( * either express or implied. See the License for the specific language)61.2 584.9 ms
+( * governing permissions and limitations under the License.)61.2 574.9 ms
+( */)61.2 564.9 ms
+(/**)61.2 544.9 ms
+( * @file LengthControllerYAML.cpp)61.2 534.9 ms
+( * @brief Implementation of LengthControllerYAML.)61.2 524.9 ms
+( * @author Drew Sabelhaus)61.2 514.9 ms
+( * $Id$)61.2 504.9 ms
+( */)61.2 494.9 ms
+(// This module)61.2 474.9 ms
+0 0 0.376 r
+(#include )61.2 464.9 ms
+0.498 0.125 0.498 r
+("LengthControllerYAML.h")s
+0.498 0.498 0 r
+(// This application)61.2 454.9 ms
+0 0 0.376 r
+(#include )61.2 444.9 ms
+0.498 0.125 0.498 r
+("yamlbuilder/TensegrityModel.h")s
+0.498 0.498 0 r
+(// This library)61.2 434.9 ms
+0 0 0.376 r
+(#include )61.2 424.9 ms
+0.498 0.125 0.498 r
+("core/tgBasicActuator.h")s
+0 0 0.376 r
+(#include )61.2 414.9 ms
+0.498 0.125 0.498 r
+("core/tgSpringCableActuator.h")s
+0 0 0.376 r
+(#include )61.2 404.9 ms
+0.498 0.125 0.498 r
+("core/tgString.h")s
+0 0 0.376 r
+(#include )61.2 394.9 ms
+0.498 0.125 0.498 r
+("core/tgTags.h")s
+0.498 0.498 0 r
+(//#include "sensors/tgDataObserver.h")61.2 374.9 ms
+(// The C++ Standard Library)61.2 364.9 ms
+0 0 0.376 r
+(#include )61.2 354.9 ms
+0.498 0.125 0.498 r
+(<cassert>)s
+0 0 0.376 r
+(#include )61.2 344.9 ms
+0.498 0.125 0.498 r
+(<stdexcept>)s
+0 0 0.376 r
+(#include )61.2 334.9 ms
+0.498 0.125 0.498 r
+(<vector>)s
+0 0 0.376 r
+(#include )61.2 324.9 ms
+0.498 0.125 0.498 r
+(<iostream>)s
+0 0 0.376 r
+(#include )61.2 314.9 ms
+0.498 0.125 0.498 r
+("helpers/FileHelpers.h")s
+0 0 0.376 r
+(#include )61.2 304.9 ms
+0.498 0.125 0.498 r
+(<stdexcept>)s
+0 0 0.376 r
+(#include )61.2 294.9 ms
+0.498 0.125 0.498 r
+(<string.h>)s
+0.498 0.498 0 r
+(// Constructor assigns variables, does some simple sanity checks.)61.2 274.9 ms
+(// Also, initializes the accumulator variable timePassed so that it can)61.2 264.9 ms
+(// be incremented in onStep.)61.2 254.9 ms
+0 g
+(LengthControllerYAML::LengthControllerYAML\()61.2 244.9 ms
+0.188 0.188 0.498 r
+(double)s
+0 g
+( startTime,)s
+(             )61.2 234.9 ms
+0.188 0.188 0.498 r
+(double)s
+0 g
+( minLength,)s
+(             )61.2 224.9 ms
+0.188 0.188 0.498 r
+(double)s
+0 g
+( rate,)s
+(             std::vector<std::string> lengthen,)61.2 214.9 ms
+(             std::vector<std::string> shorten\) :)61.2 204.9 ms
+(  m_startTime\(startTime\),)61.2 194.9 ms
+(  m_minLength\(minLength\),)61.2 184.9 ms
+(  m_rate\(rate\),)61.2 174.9 ms
+(  m_lengthen\(lengthen\),)61.2 164.9 ms
+(  m_shorten\(shorten\),)61.2 154.9 ms
+(  m_timePassed\()61.2 144.9 ms
+0.498 0.125 0.498 r
+(0.0)s
+0 g
+(\))s
+({)61.2 134.9 ms
+(  )61.2 124.9 ms
+0.498 0.498 0 r
+(// start time must be greater than or equal to zero)s
+0 g
+(  )61.2 114.9 ms
+0 0.498 0.498 r
+(if)s
+0 g
+(\( m_startTime < )s
+0.498 0.125 0.498 r
+(0.0)s
+0 g
+( \) {)s
+(    )61.2 104.9 ms
+0 0.498 0.498 r
+(throw)s
+0 g
+( std::invalid_argument\()s
+0.498 0.125 0.498 r
+("Start time must be greater than or equal to zero.")s
+0 g
+(\);)s
+(  })61.2 94.9 ms
+(  )61.2 84.9 ms
+0.498 0.498 0 r
+(// min length must be between 1 and 0)s
+0 g
+(  )61.2 74.9 ms
+0 0.498 0.498 r
+(else)s
+0 g
+( )s
+0 0.498 0.498 r
+(if)s
+0 g
+(\( m_minLength > )s
+0.498 0.125 0.498 r
+(1)s
+0 g
+( \) {)s
+(    )61.2 64.9 ms
+0 0.498 0.498 r
+(throw)s
+0 g
+( std::invalid_argument\()s
+0.498 0.125 0.498 r
+("minLength is a percent, must be less than 1. \(100%\)")s
+0 g
+(\))s
+(;)61.2 54.9 ms
+(  })61.2 44.9 ms
+re sp
+%%PageTrailer
+%%Page: 2 2
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(LengthControllerYAML.cpp                                                        Page 2)61.2 744.9 ms
+F0 sf
+(  )61.2 724.9 ms
+0 0.498 0.498 r
+(else)s
+0 g
+( )s
+0 0.498 0.498 r
+(if)s
+0 g
+(\( m_minLength < )s
+0.498 0.125 0.498 r
+(0.0)s
+0 g
+(\) {)s
+(    )61.2 714.9 ms
+0 0.498 0.498 r
+(throw)s
+0 g
+( std::invalid_argument\()s
+0.498 0.125 0.498 r
+("minLength is a percent, must be greater than 0.")s
+0 g
+(\);)s
+(  })61.2 704.9 ms
+(  )61.2 694.9 ms
+0.498 0.498 0 r
+(// rate must be greater than zero)s
+0 g
+(  )61.2 684.9 ms
+0 0.498 0.498 r
+(else)s
+0 g
+( )s
+0 0.498 0.498 r
+(if)s
+0 g
+(\( rate < )s
+0.498 0.125 0.498 r
+(0.0)s
+0 g
+( \) {)s
+(    )61.2 674.9 ms
+0 0.498 0.498 r
+(throw)s
+0 g
+( std::invalid_argument\()s
+0.498 0.125 0.498 r
+("Rate cannot be negative.")s
+0 g
+(\);)s
+(  })61.2 664.9 ms
+(  )61.2 654.9 ms
+0.498 0.498 0 r
+(// @)s
+0 g
+(TODO)s
+0.498 0.498 0 r
+(: what checks to make on tags?)s
+0 g
+(})61.2 644.9 ms
+0.498 0.498 0 r
+(/**)61.2 624.9 ms
+( * The initializeActuators method is call in onSetup to put pointers to )61.2 614.9 ms
+( * specific actuators in the cablesWithTags array, as well as store the initial)61.2 604.9 ms
+( * rest lengths in the initialRL map.)61.2 594.9 ms
+( */)61.2 584.9 ms
+0.188 0.188 0.498 r
+(void)61.2 574.9 ms
+0 g
+( LengthControllerYAML::initializeActuators\(TensegrityModel& subject,)s
+(                 std::string tag\) {)61.2 564.9 ms
+(  )61.2 554.9 ms
+0.498 0.498 0 r
+(//DEBUGGING)s
+0 g
+(  std::cout << )61.2 544.9 ms
+0.498 0.125 0.498 r
+("Finding cables with the tag: ")s
+0 g
+( << tag << std::endl;)s
+(  )61.2 534.9 ms
+0.498 0.498 0 r
+(// Pick out the actuators with the specified tag)s
+0 g
+(  std::vector<tgBasicActuator*> foundActuators = subject.find<tgBasicActuator>\(tag\);)61.2 524.9 ms
+(  std::cout << )61.2 514.9 ms
+0.498 0.125 0.498 r
+("The following cables were found and will be controlled: ")s
+0 g
+(      << std::endl;)61.2 504.9 ms
+(  )61.2 494.9 ms
+0.498 0.498 0 r
+(//Iterate through array and output strings to command line)s
+0 g
+(  )61.2 484.9 ms
+0 0.498 0.498 r
+(for)s
+0 g
+( \(std::)s
+0.188 0.188 0.498 r
+(size_t)s
+0 g
+( i = )s
+0.498 0.125 0.498 r
+(0)s
+0 g
+(; i < foundActuators.size\(\); i ++\) {  )s
+(    std::cout << foundActuators[i]->getTags\(\) << std::endl;)61.2 474.9 ms
+(    )61.2 464.9 ms
+0.498 0.498 0 r
+(// Also, add the rest length of the actuator at this time)s
+0 g
+(    )61.2 454.9 ms
+0.498 0.498 0 r
+(// to the list of all initial rest lengths.)s
+0 g
+(    initialRL[foundActuators[i]->getTags\(\)] = foundActuators[i]->getRestLength\(\);)61.2 444.9 ms
+(    )61.2 434.9 ms
+0.498 0.498 0 r
+(//DEBUGGING:)s
+0 g
+(    std::cout << )61.2 424.9 ms
+0.498 0.125 0.498 r
+("Cable rest length at t=0 is ")s
+0 g
+(        << initialRL[foundActuators[i]->getTags\(\)] << std::endl;)61.2 414.9 ms
+(  })61.2 404.9 ms
+(  )61.2 394.9 ms
+0.498 0.498 0 r
+(// Add this list of actuators to the full list. Thanks to:)s
+0 g
+(  )61.2 384.9 ms
+0.498 0.498 0 r
+(// http://stackoverflow.com/questions/201718/concatenating-two-stdvectors)s
+0 g
+(  )61.2 374.9 ms
+0.498 0.498 0 r
+(//if\(foundActuators.begin\(\)./foundAc)s
+0 g
+(  cablesWithTags.insert\( cablesWithTags.end\(\), foundActuators.begin\(\),)61.2 364.9 ms
+(       foundActuators.end\(\) \);)61.2 354.9 ms
+(})61.2 344.9 ms
+0.498 0.498 0 r
+(/**)61.2 324.9 ms
+( * For this controller, the onSetup method initializes the actuators,)61.2 314.9 ms
+( * which means just store pointers to them and record their rest lengths.)61.2 304.9 ms
+( * This method calls the helper initializeActuators.)61.2 294.9 ms
+( */)61.2 284.9 ms
+0.188 0.188 0.498 r
+(void)61.2 274.9 ms
+0 g
+( LengthControllerYAML::onSetup\(TensegrityModel& subject\))s
+({)61.2 264.9 ms
+(  std::cout << )61.2 254.9 ms
+0.498 0.125 0.498 r
+("Setting up the LengthControllerYAML controller.")s
+0 g
+( << std::endl;)s
+(  )61.2 244.9 ms
+0.498 0.498 0 r
+(//      << "Finding cables with tags: " << m_lengthen)s
+0 g
+(  )61.2 234.9 ms
+0.498 0.498 0 r
+(//      << std::endl;)s
+0 g
+(  cablesWithTags = {};)61.2 224.9 ms
+(  )61.2 214.9 ms
+0.498 0.498 0 r
+(// For all the strings in the list, call initializeActuators.)s
+0 g
+(  std::vector<std::string>::iterator it;)61.2 204.9 ms
+(  )61.2 194.9 ms
+0 0.498 0.498 r
+(for)s
+0 g
+(\( it = m_lengthen.begin\(\); it < m_lengthen.end\(\); it++ \) {)s
+(    )61.2 184.9 ms
+0.498 0.498 0 r
+(// Call the helper for this tag.)s
+0 g
+(    initializeActuators\(subject, *it\);)61.2 174.9 ms
+(  })61.2 164.9 ms
+(  )61.2 154.9 ms
+0 0.498 0.498 r
+(for)s
+0 g
+(\( it = m_shorten.begin\(\); it < m_shorten.end\(\); it++ \) {)s
+(    )61.2 144.9 ms
+0.498 0.498 0 r
+(// Call the helper for this tag.)s
+0 g
+(    initializeActuators\(subject, *it\);)61.2 134.9 ms
+(  })61.2 124.9 ms
+(  std::cout << )61.2 114.9 ms
+0.498 0.125 0.498 r
+("Finished setting up the controller.")s
+0 g
+( << std::endl;    )s
+(})61.2 104.9 ms
+0.188 0.188 0.498 r
+(void)61.2 84.9 ms
+0 g
+( LengthControllerYAML::onStep\(TensegrityModel& subject, )s
+0.188 0.188 0.498 r
+(double)s
+0 g
+( dt\))s
+({)61.2 74.9 ms
+(  )61.2 64.9 ms
+0.498 0.498 0 r
+(// First, increment the accumulator variable.)s
+0 g
+(  m_timePassed += dt;)61.2 54.9 ms
+(  )61.2 44.9 ms
+0.498 0.498 0 r
+(// Then, if it's passed the time to start the controller,)s
+re sp
+%%PageTrailer
+%%Page: 3 3
+%%BeginPageSetup
+sv
+0 g
+F0 sf
+%%EndPageSetup
+F1 sf
+(LengthControllerYAML.cpp                                                        Page 3)61.2 744.9 ms
+F0 sf
+(  )61.2 724.9 ms
+0 0.498 0.498 r
+(if)s
+0 g
+(\( m_timePassed > m_startTime \) {)s
+(    )61.2 714.9 ms
+0.498 0.498 0 r
+(// For each cable, check if its rest length is past the minimum,)s
+0 g
+(    )61.2 704.9 ms
+0.498 0.498 0 r
+(// otherwise adjust its length according to m_rate and dt.)s
+0 g
+(    )61.2 694.9 ms
+0 0.498 0.498 r
+(for)s
+0 g
+( \(std::)s
+0.188 0.188 0.498 r
+(size_t)s
+0 g
+( i = )s
+0.498 0.125 0.498 r
+(0)s
+0 g
+(; i < cablesWithTags.size\(\); i ++\) {  )s
+(      )61.2 684.9 ms
+0.188 0.188 0.498 r
+(double)s
+0 g
+( currRestLength = cablesWithTags[i]->getRestLength\(\);)s
+(      )61.2 674.9 ms
+0.498 0.498 0 r
+(// Calculate the minimum rest length for this cable.)s
+0 g
+(      )61.2 664.9 ms
+0.498 0.498 0 r
+(// Remember that m_minLength is a percent.)s
+0 g
+(      )61.2 654.9 ms
+0.188 0.188 0.498 r
+(double)s
+0 g
+( minRestLength = initialRL[cablesWithTags[i]->getTags\(\)] * m_minLength;)s
+(      )61.2 644.9 ms
+0.498 0.498 0 r
+(// If the current rest length is still greater than the minimum,)s
+0 g
+(      )61.2 634.9 ms
+0 0.498 0.498 r
+(if)s
+0 g
+(\( currRestLength > minRestLength \) {)s
+(  )61.2 624.9 ms
+0.498 0.498 0 r
+(// output a progress bar for the controller, to track when control occurs.)s
+0 g
+(  std::cout << )61.2 614.9 ms
+0.498 0.125 0.498 r
+(".")s
+0 g
+( << i;)s
+(  )61.2 604.9 ms
+0.498 0.498 0 r
+(// Then, adjust the rest length of the actuator itself, according to)s
+0 g
+(  )61.2 594.9 ms
+0.498 0.498 0 r
+(// m_rate and dt.)s
+0 g
+(  )61.2 584.9 ms
+0.188 0.188 0.498 r
+(double)s
+0 g
+( nextRestLength;)s
+(  )61.2 574.9 ms
+0 0.498 0.498 r
+(if)s
+0 g
+(\(strcmp\( *\(cablesWithTags[i]->getTags\(\).getTags\(\).front\(\)\), std::string\()s
+0.498 0.125 0.498 r
+("shorten")s
+0 g
+(\))s
+( \) == )61.2 564.9 ms
+0.498 0.125 0.498 r
+(0)s
+0 g
+(\) {)s
+(    nextRestLength = currRestLength - m_rate * dt;)61.2 554.9 ms
+(  })61.2 544.9 ms
+(  )61.2 534.9 ms
+0 0.498 0.498 r
+(else)s
+0 g
+( )s
+0 0.498 0.498 r
+(if)s
+0 g
+(\(strcmp\( *\(cablesWithTags[i]->getTags\(\).getTags\(\).front\(\)\), std::string\()s
+0.498 0.125 0.498 r
+("leng)s
+(then")61.2 524.9 ms
+0 g
+(\) \) == )s
+0.498 0.125 0.498 r
+(0)s
+0 g
+(\) {)s
+(    nextRestLength = currRestLength + m_rate * dt;)61.2 514.9 ms
+(  })61.2 504.9 ms
+(  )61.2 494.9 ms
+0 0.498 0.498 r
+(else)s
+0 g
+( {)s
+(    std::cout<< )61.2 484.9 ms
+0.498 0.125 0.498 r
+("tags were neither shorten nor lengthen!")s
+0 g
+( << std::endl;)s
+(    )61.2 474.9 ms
+0 0.498 0.498 r
+(return)s
+0 g
+(;)s
+(  })61.2 464.9 ms
+(  )61.2 454.9 ms
+0.498 0.498 0 r
+(//DEBUGGING)s
+0 g
+(  )61.2 444.9 ms
+0.498 0.498 0 r
+(//std::cout << "Next Rest Length: " << nextRestLength << std::endl;)s
+0 g
+(  cablesWithTags[i]->setControlInput\(nextRestLength,dt\);)61.2 434.9 ms
+(      })61.2 424.9 ms
+(    }   )61.2 414.9 ms
+(  })61.2 404.9 ms
+(})61.2 394.9 ms
+(  )61.2 384.9 ms
+( )61.2 374.9 ms
+re sp
+%%PageTrailer
+%%Trailer
+%%Pages: 3
+%%EOF
+

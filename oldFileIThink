@@ -1,0 +1,454 @@
+/*
+ * Copyright © 2012, United States Government, as represented by the
+ * Administrator of the National Aeronautics and Space Administration.
+ * All rights reserved.
+ * 
+ * The NASA Tensegrity Robotics Toolkit (NTRT) v1 platform is licensed
+ * under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
+/**
+ * @file BallDropperYAML.cpp
+ * @brief Implementation of BallDropperYAML.
+ * @author Drew Sabelhaus
+ * $Id$
+ */
+
+// This module
+#include "BallDropperYAML.h"
+// This application
+#include "yamlbuilder/TensegrityModel.h"
+// This library
+#include "core/tgBasicActuator.h"
+#include "core/tgSpringCableActuator.h"
+#include "core/tgTags.h"
+#include "LinearMath/btVector3.h"
+#include "LinearMath/btScalar.h"
+#include "LinearMath/btMatrix3x3.h"
+#include "LinearMath/btQuaternion.h"
+
+//#include "sensors/tgDataObserver.h"
+// The C++ Standard Library
+#include <cassert>
+#include <stdexcept>
+#include <vector>
+#include <iostream>
+#include "helpers/FileHelpers.h"
+#include <stdexcept>
+#include <string.h>
+#include <math.h>
+
+
+
+
+// Constructor assigns variables, does some simple sanity checks.
+// Also, initializes the accumulator variable timePassed so that it can
+// be incremented in onStep.
+BallDropperYAML::BallDropperYAML(double startTime,
+    double minTension,
+    double rate,
+    double angleOfTravel) {
+  //vector<string> rods,
+  //vector<string> strings) :
+  // startTime(startTime),
+  // minTension(minTension),
+  // rate(rate),
+  // angleOfTravel(angleOfTravel),
+  // timePassed(0.0)
+  //{
+  this->startTime = startTime;
+  this->minTension = minTension;
+  this->rate = rate;
+  this->angleOfTravel = angleOfTravel;
+  this->timePassed =  0.0;
+  // start time must be greater than or equal to zero
+  if( startTime < 0.0 ) {
+    throw invalid_argument("Start time must be greater than or equal to zero.");
+  }
+  // minTension must be greater than some lower bound
+  else if( minTension <= 0 ) {
+    throw invalid_argument(
+        "Tension is not high enough. min is currently set to 1." );
+  }
+  // rate must be greater than zero
+  else if( rate < 0.0 ) {
+    throw invalid_argument("Rate cannot be negative.");
+  }
+  // @TODO: what checks to make on tags?
+}
+
+/**
+ * The initializeActuators method is called in onSetup to fill the cables and
+ * rods arrays, as well as store the initial rest lengths in the initialRL map.
+ */
+void BallDropperYAML::initializeStructure( TensegrityModel& subject ) {
+  //DEBUGGING
+  // Pick out the actuators and rods by tag
+  cube.erase(cube.begin(), cube.end());
+  rods.erase(rods.begin(), rods.end());
+  cables.erase(cables.begin(), cables.end());
+
+  // for each name in CABLES, add the corresponding cable to the cables array
+  for( int i = 0; i < sizeof(CABLES)/sizeof(CABLES[0]); i++ ) {
+    string tag = CABLES[i];
+    tgBasicActuator* grabbedCable = subject.find<tgBasicActuator>(tag).front();
+    cables.push_back(grabbedCable);
+  }
+  // for each name in RODS, add the corresponding rod to the rods array
+  for( int i = 0; i < sizeof(RODS)/sizeof(RODS[0]); i++ ) {
+    string tag = RODS[i];
+    tgRod* grabbedRod = subject.find<tgRod>(tag).front();
+    rods.push_back(grabbedRod);
+  }
+  // grab the box
+  string tag = CUBE;
+  tgBox* box = subject.find<tgBox>(tag).front();
+
+  //for each rod in the RODS, add its end points to the nodes vector
+  for( size_t i = 0; i < rods.size(); i++ ) {
+    cout<< rods[i]->toString() <<endl;
+    pair< btVector3*, btVector3* > endPoints = rods[i]->ends();
+    //do you have a segfault? look at this thing. maybe trying to access stuff
+    //on the stack that has been overwritten
+    nodes.insert( nodes.begin(), endPoints.first );
+    nodes.insert( nodes.begin(), endPoints.second );
+  }
+
+  //add the middle of the cube to the nodes vector
+  btVector3 top = btVector3();
+  btVector3* middle = new btVector3();
+  btVector3 bottom = btVector3();
+  top = *(box->ends().first);
+  bottom = *(box->ends().second);
+  *middle = (top + bottom)/2;
+  nodes.insert( nodes.begin(), middle );
+
+}
+
+/**
+ * For this controller, the onSetup method initializes the actuators,
+ * which means just store pointers to them and record their rest lengths.
+ * This method calls the helper initializeActuators.
+ */
+void BallDropperYAML::onSetup( TensegrityModel& subject )
+{
+  cout << "Setting up the BallDropperYAML controller." << endl;
+  //	    << "Finding cables with tags: " << lengthen
+  //	    << endl;
+  //lengthen_vector = {};
+  //shorten_vector = {};
+  initializeStructure( subject );
+  initializeController();
+  // For all the strings in the list, call initializeActuators.
+  cout << "Finished setting up the controller." << endl;    
+  moveTheBall( 1, 1, 1);
+}
+
+
+void BallDropperYAML::moveTheBall( double x, double y, double z ) {
+  // 1.create connectivity matrix, calling from and to to get points and stuff
+  int rodsAndCables = 12 + 6;
+  int nodes = 12 + 12;
+  double Connectivity[nodes][rodsAndCables];
+}
+
+// #<{(|*
+//  * Takes in a pointer to a rod object, then accesses the center of mass, the
+//  * orientation, and the length, and then calculates and returns the current
+//  * rod end points
+//  |)}>#
+// pair< btVector3*, btVector3* > BallDropperYAML::getEnds( tgBaseRigid* member ) {
+//   //still borken
+//   // if( typeof(member) == tgRod* ) {
+//   //   member
+//   double memberLength = ((tgRod*) member)->length();
+//   btVector3 center = member->centerOfMass();
+//   btVector3 orientation = member->orientation();
+//   btVector3 memberAxis = btVector3( btScalar(0), btScalar(1), btScalar(0) );
+//
+//   // use btMatrix to avoid the implementation of euler angles, because they are
+//   // undocumented and possibly wrong (?)
+//   btMatrix3x3 rotMatrix = btMatrix3x3();
+//   btQuaternion quatOrientation;
+//   rotMatrix.setEulerYPR(orientation.getX(), orientation.getY(),
+//       orientation.getZ() ); // fill rotMatrix
+//   // set quatOrientation as the quaternion representing the body's orientation
+//   rotMatrix.getRotation( quatOrientation ); 
+//
+//   // Rotate the axis from its initialization to its current orientation
+//   btVector3 axisOfRot = quatOrientation.getAxis();
+//   btScalar angleOfRot = quatOrientation.getAngle();
+//   memberAxis = memberAxis.rotate( axisOfRot, angleOfRot );
+//
+//   // find endpoints of member
+//   btVector3* pt1 = new btVector3();
+//   btVector3* pt2 = new btVector3();
+//   *pt1 = memberAxis*(memberLength/2) + center;
+//   *pt2 = memberAxis*(-memberLength/2) + center;
+//
+//   //debugging
+//   cout << "Center: " << center  << endl;
+//   cout << "Rotated pt1: " << *pt1  << endl;
+//   cout << "Rotated pt2: " << *pt2  << endl;
+//   cout<<endl;
+//
+//
+//   return pair< btVector3*, btVector3* >(pt1, pt2);
+// }
+
+
+void BallDropperYAML::initializeController() {
+
+
+  double distance;
+  btVector3 target = btVector3( btScalar(0), btScalar(8.42), btScalar(0) );
+
+  vector<double> targetLengths = vector<double>();
+  for( int i = 0; i < cables.size(); i++) {
+    targetLengths.insert(targetLengths.begin(),
+        nodes[i]->distance(target) );
+    desiredCableDirections.insert(desiredCableDirections.begin(),
+        target - *nodes[i] );
+    desiredCableDirections[0].normalize();
+    cout<<"length: "<<targetLengths[0] << ", directions: "<< 
+      desiredCableDirections[0] <<endl;
+    //cout<< cables[i]->toString() <<endl;
+  }
+
+  Connectivity = ublas::matrix<double>(12, 13);
+  for( int row = 0; row < 12; row++ ) {
+    for( int col = 0; col < 13; col++ ) {
+      Connectivity(row, col) = C[row][col]; 
+    }
+  }
+  // char const msg[500];
+  // for( int i = 0; i < 500; i++) { 
+  //   msg[i] = '\0';
+  // }
+  // Connectivity.printMatrix(msg);
+
+//   cout<< Connectivity(1,1) <<", " <<endl;
+//   cout<< Connectivity(1,2) <<", " <<endl;
+//   cout<< Connectivity(1,3) <<", " <<endl;
+//   cout<< Connectivity(1,4) <<", " <<endl;
+
+
+
+  // ublas::vector<double> x = ublas::vector<double>(nodes.size() );
+  // ublas::vector<double> y = ublas::vector<double>(nodes.size() );
+  // ublas::vector<double> z = ublas::vector<double>(nodes.size() );
+  // for( int i = 0; i < nodes.size(); i++ ) {
+  //   x(i) = nodes[i]->getX();
+  //   y(i) = nodes[i]->getY();
+  //   z(i) = nodes[i]->getZ();
+  //   // y.setElem(i, 0, nodes[i]->getY() );
+  //   // z.setElem(i, 0, nodes[i]->getZ() );
+  // }
+  
+  
+  ublas::vector<double> x = ublas::vector<double>(nodes.size() );
+  ublas::vector<double> y = ublas::vector<double>(nodes.size() );
+  ublas::vector<double> z = ublas::vector<double>(nodes.size() );
+  for( int i = 0; i < nodes.size(); i++ ) {
+    x(i) = nodes[i]->getX();
+    y(i) = nodes[i]->getY();
+    z(i) = nodes[i]->getZ();
+  }
+  mat tempTop = prod( trans(C), diag( prod(C,x) ) );
+  mat tempMid = prod( trans(C), diag( prod(C,y) ) );
+  mat tempBot = prod( trans(C), diag( prod(C,z) ) );
+
+  const_iteratorl elem = A.begin1();
+  const_iteratorl topElem = tempTop.begin1();
+  const_iteratorl midElem = tempMod.begin1();
+  const_iteratorl botElem = tempBot.begin1();
+  while( topElem != tempTop.end1() ) {
+    *elem++ = *topElem++;
+  }
+  while( midElem != tempMid.end1() ) {
+    *elem++ = *midElem++;
+  }
+  while( botElem != tempBot.end1() ) {
+    *elem++ = *botElem++;
+  }
+
+  cout<< "Conn: " <<Connectivity.size1()<<"x" << Connectivity.size2() <<endl;
+  cout<< "A: " <<A.size1()<<endl;
+  A = prod( Connectivity, x ); //Connectivity.t() * (Connectivity*x).diag()//;
+
+
+
+  // convert C array (stand in for connectivity) to armadillo matrix
+//   Connectivity = btMatrixX<double>(12, 13);
+//   for( int row = 0; row < 12; row++ ) {
+//     for( int col = 0; col < 13; col++ ) {
+//       Connectivity.setElem(row, col, C[row][col]); 
+//     }
+//   }
+//   // char const msg[500];
+//   // for( int i = 0; i < 500; i++) { 
+//   //   msg[i] = '\0';
+//   // }
+//   // Connectivity.printMatrix(msg);
+//
+//   cout<< Connectivity(1,1) <<", " <<endl;
+//   cout<< Connectivity(1,2) <<", " <<endl;
+//   cout<< Connectivity(1,3) <<", " <<endl;
+//   cout<< Connectivity(1,4) <<", " <<endl;
+//   btMatrixX<double> x = btMatrixX<double>(nodes.size(), 1 );
+//   btMatrixX<double> y = btMatrixX<double>(nodes.size(), 1 );
+//   btMatrixX<double> z = btMatrixX<double>(nodes.size(), 1);
+//   for( int i = 0; i < nodes.size(); i++ ) {
+//     x.setElem(i, 0, nodes[i]->getX() );
+//     y.setElem(i, 0, nodes[i]->getY() );
+//     z.setElem(i, 0, nodes[i]->getZ() );
+//   }
+// //
+//   A = Connectivity * x; //Connectivity.t() * (Connectivity*x).diag()//;
+       // Connectivity.t() * (Connectivity*y).diag();
+       // Connectivity.t() * (Connectivity*z).diag();];
+
+
+  //We want A
+  //A = 
+  //
+
+
+  //int intForces[3][13] = 
+
+  // take a position target
+  //
+  // Calculate forces in the cables to place node 13 at target
+  //
+
+
+
+  // C = 13x24
+  // C = [ cable1 connectivity
+  //       cable2 connectivity
+  //       cable3 connectivity
+  //               ...
+  //        cube connectivity  ]
+  //
+  //connectivity = [supernode1, supernode2, ..., cubenode1, cubenode2, ...
+  //
+  // C = [
+  // nodes 1-12 (in order)
+  // -----------
+  //   left_vert_bottom: [-7.5, 0, 0]
+  //   left_vert_top: [-7.5, 16.84, 0]
+  //   right_vert_bottom: [7.5, 0, 0]
+  //   right_vert_top: [7.5, 16.84, 0]
+  //
+  //   bottom_horiz_prox: [0, 0.92, -8.42]
+  //   bottom_horiz_dist: [0, 0.92, 8.42]
+  //   top_horiz_prox: [0, 15.92, -8.42]
+  //   top_horiz_dist: [0, 15.92, 8.42]
+  //
+  //   prox_horiz_left: [-8.42, 8.42, -7.5]
+  //   prox_horiz_right: [8.42, 8.42, -7.5]
+  //   dist_horiz_left: [-8.42, 8.42, 7.5]
+  //   dist_horiz_right: [8.42, 8.42, 7.5]
+  //
+  // nodes 13-24 (in order)
+  // ------------
+  //   bml: [0,   7.15, -1.27]
+  //   bmr: [0,   7.15, 1.27]
+  //   bfm: [-1.27,   7.15, 0]
+  //   bbm: [1.27,   7.15, 0]
+  //
+  //   mbl: [1.27,   8.42, -1.27]
+  //   mfl: [-1.27,   8.42, -1.27]
+  //   mfr: [-1.27,   8.42, 1.27]
+  //   mbr: [1.27,   8.42, 1.27]
+  //
+  //   tml: [0,   9.69, -1.27]
+  //   tmr: [0,   9.69, 1.27]
+  //   tfm: [-1.27,   9.69, 0]
+  //   tbm: [1.27,   9.69, 0]
+
+  //
+
+  // 2. write out p matrix (external forces)
+
+  // 3. transform C to A
+
+  // 4. minimize thing, ask jeff about this
+}
+
+
+/**
+*/
+//BallDropperYAML::rotate( btVector3* pt, btVector3* euler angles)
+
+
+
+
+
+/* old playing around-thing, tightens some cables and lengthens others.
+ * maintains a min tension as well
+ */
+void BallDropperYAML::onStep(TensegrityModel& subject, double dt)
+{
+  /*
+     double nextRestLength;
+     double currRestLength;
+     double minRestLength;
+     timePassed += dt;
+     if( timePassed > startTime ) {
+  // if enough time has passed, actuate cables
+  for (size_t i = 0; i < shorten_vector.size(); i ++) {	
+  // shorten the cables in shorten_vector
+  currRestLength = shorten_vector[i]->getRestLength();
+  // Calculate the minimum rest length for this cable.
+  // Remember that minLength is a percent.
+  minRestLength = initialRL[shorten_vector[i]->getTags()] * minLength;
+  // If the current rest length is not too small
+  if( currRestLength > minRestLength ) {
+  // output a progress bar for the controller, to track when control occurs.
+  cout << ".";
+  nextRestLength = currRestLength - rate * dt;
+  //DEBUGGING
+  //cout << "Next Rest Length: " << nextRestLength << endl;
+  shorten_vector[i]->setControlInput(nextRestLength,dt);
+  }
+  }   
+  for (size_t i = 0; i < lengthen_vector.size(); i ++) {	
+  // lengthen the cables in lengthen_vector
+  currRestLength = lengthen_vector[i]->getRestLength();
+  // Calculate the minimum rest length for this cable.
+  // Remember that minLength is a percent.
+  minRestLength = initialRL[lengthen_vector[i]->getTags()] * minLength;
+  // If the current rest length is not too small
+  if( lengthen_vector[i]->getTension() > 1 ){
+  // output a progress bar for the controller, to track when control occurs.
+  cout << "lengthen";
+  nextRestLength = currRestLength + rate * dt;
+  //DEBUGGING
+  //cout << "Next Rest Length: " << nextRestLength << endl;
+  lengthen_vector[i]->setControlInput(nextRestLength,dt);
+  }
+  else if( currRestLength > minRestLength) {
+  cout << "shorten";
+  nextRestLength = currRestLength - rate * dt;
+  //DEBUGGING
+  //cout << "Next Rest Length: " << nextRestLength << endl;
+  lengthen_vector[i]->setControlInput(nextRestLength,dt);
+  }
+
+  }   
+  }
+  */
+}
+// */
+
+
