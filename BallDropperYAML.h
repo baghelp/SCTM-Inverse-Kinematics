@@ -81,6 +81,8 @@
 // #define PAYLOAD_MASS 10 // kg's (original units)
 #define ROD_MASS 6
 #define NUM_CABLES 12
+#define CROWS 12
+#define CCOLS 13
 #define MIN_RL 0.5
 using namespace std;
 using namespace boost::numeric;
@@ -88,8 +90,8 @@ using namespace boost::numeric;
 // Forward declarations
 class TensegrityModel;
 class tgBasicActuator;
-typedef ublas::matrix<double> mat;
-typedef ublas::vector<double> vec;
+typedef ublas::matrix<double> myMat;
+typedef ublas::vector<double> myVec;
 
 /**
  * A controller to apply the length change in the cables of the 3-bar example
@@ -149,29 +151,29 @@ public:
 
   /**
    */
-  // pair<mat*, mat*> QRDecomp( mat A );
+  // pair<myMat*, myMat*> QRDecomp( myMat A );
 
   /**
    */
-  vec proj( vec, vec );
+  myVec proj( myVec, myVec );
 
   /**
    */
-  pair<mat, mat> grammyDecomp( mat );
+  pair<myMat, myMat> grammyDecomp( myMat );
 
   /**
    */
   // template<class T>
-  bool InvertMatrix(const mat* input, mat* inverse);
+  bool InvertMatrix(const myMat* input, myMat* inverse);
 // InvertUpperTriangularMatrix
 
   /**
    */
-  vec findW(mat V, mat A_dag, vec forces);
+  myVec findW(myMat V, myMat A_dag, myVec forces);
 
   /**
    */
-  double cost(mat V, vec w, mat A_dag_s, vec p );
+  double cost(myMat V, myVec w, myMat A_dag_s, myVec p );
 
 
   /**
@@ -181,7 +183,7 @@ public:
 
   /**
    */
-  void updateRLengths();
+  void updateRLengths( btVector3 relativeCubeTarget );
 
 protected:
 
@@ -201,8 +203,18 @@ protected:
    * Return a matrix with the passed in vector as its diagonal elements, and
    * zeros in the off diagonals
    */
-  mat diag( vec inVec );
+  myMat diag( myVec inVec );
 
+  /**
+   * get the center of the current superball
+   */
+  btVector3 getSuperballCenter();
+
+  /**
+   * use inverse kinematics to find the necessary adjustment to the cables
+   * lengths
+   */
+  void inverseKin( myVec targetActualLengths, int C[12][13], int Crows, int Ccols, double springConstant, vector<btVector3*> nodes, btVector3 target );
 
 private:
 	
@@ -218,6 +230,37 @@ private:
   std::vector<tgRod*> rods;
   std::vector<tgBox*> cube;
   std::vector< btVector3* > nodes;
+  std::vector< btVector3 > initDisplacementVectors = std::vector<btVector3>();
+  // setting up vectors for rope offsets (from cubeCenter to attachment points)
+  // under various cube orientations
+  btVector3 cubeCenter = btVector3( 0, 8.42, 0);
+  // // tfm
+  // initDisplacementVectors.push_back( btVector3(-1.27,   9.69, 0) - cubeCenter);
+  // // bfm
+  // initDisplacementVectors.push_back( btVector3(-1.27,   7.15, 0) - cubeCenter);
+  // // tbm
+  // initDisplacementVectors.push_back( btVector3(1.27,   9.69, 0) - cubeCenter);
+  // // bbm
+  // initDisplacementVectors.push_back( btVector3(1.27,   7.15, 0) - cubeCenter);
+  // // bmr
+  // initDisplacementVectors.push_back( btVector3(0,   7.15, 1.27) - cubeCenter);
+  // // bml
+  // initDisplacementVectors.push_back( btVector3(0,   7.15, -1.27) - cubeCenter);
+  // // tmr
+  // initDisplacementVectors.push_back( btVector3(0,   9.69, 1.27) - cubeCenter); 
+  // // tml
+  // initDisplacementVectors.push_back( btVector3(0,   9.69, -1.27) - cubeCenter);
+  // // mbl
+  // initDisplacementVectors.push_back( btVector3(1.27, 8.42, -1.27) - cubeCenter);
+  // // mfl
+  // initDisplacementVectors.push_back( btVector3(-1.27,8.42, -1.27) - cubeCenter);
+  // // mbr
+  // initDisplacementVectors.push_back( btVector3(1.27,  8.42, 1.27) - cubeCenter);
+  // // mfr
+  // initDisplacementVectors.push_back( btVector3(-1.27, 8.42, 1.27) - cubeCenter);
+
+  std::vector< btVector3 > currDisplacementVectors = vector<btVector3>();
+
   std::vector< btVector3* > initialNodes = vector<btVector3*>();
   std::string const CABLES[NUM_CABLES] = {"cube_string_1", "cube_string_2",
     "cube_string_3", "cube_string_4", "cube_string_5", "cube_string_6", 
@@ -227,17 +270,17 @@ private:
     "rod_6"};
   std::string const CUBE = "super_cube";
   double springConstant = 1.0/613.0; // TODO: assuming K = 1/stiffness. check this.
-  vec targetLengths = vec(NUM_CABLES);
-  vec targetRLengths = vec(targetLengths.size());
-  btVector3 target;
+  myVec targetLengths = myVec(NUM_CABLES);
+  myVec targetRLengths = myVec(targetLengths.size());
+  btVector3 relativeCubeTarget;
   btVector3* middle;
   //still unsure of units and unsure if ntrt even has the correct cable
   //stiffness for our cables
   //
   // rows = cables, colums = nodes. connections are 1 or -1
   // (-1 is the cube connection, 1 is the rod connection)
-  int C[12][13] = {
-  //1   2   3   4   5   6   7   8   9   0   1   2   1  
+  int C[CROWS][CCOLS] = {
+  // 1   2   3   4   5   6   7   8   9   0   1   2   1  
     {1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1 }, 
     {0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1 },
     {0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0, -1 },
@@ -252,10 +295,10 @@ private:
     {0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1, -1 }
   };
   
-  ublas::matrix<double> Connectivity;// = mat(12, 13);
+  ublas::matrix<double> Connectivity;// = myMat(12, 13);
   ublas::vector<double> A;
-  // btMatrixX<double> Connectivity;// = mat(12, 13);
-  // btMatrixX<double> A;// = mat(12, 13);
+  // btMatrixX<double> Connectivity;// = myMat(12, 13);
+  // btMatrixX<double> A;// = myMat(12, 13);
 
   int extForces[3][13] = {
   //                                   |

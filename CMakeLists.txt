@@ -10,7 +10,11 @@ link_libraries(tgcreator
                 tgOpenGLSupport
 		yaml-cpp
 		TensegrityModel
-    libquadprog.a)
+    libquadprog.a
+    armadillo
+    lapack
+    blas
+    )
 
   add_executable(TModelTester
     #threeBarModel.cpp
