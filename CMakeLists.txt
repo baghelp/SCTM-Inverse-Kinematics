@@ -23,7 +23,7 @@ link_libraries(tgcreator
 ) 
 
   add_executable(DropTheCube
-    BallDropperYAML.cpp
+    InverseKinematics.cpp
     DropTheCube.cpp
 ) 
 

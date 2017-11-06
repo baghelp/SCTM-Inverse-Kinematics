@@ -26,7 +26,7 @@
 
 // This application
 #include "yamlbuilder/TensegrityModel.h"
-#include "BallDropperYAML.h"
+#include "InverseKinematics.h"
 // This library
 #include "core/terrain/tgBoxGround.h"
 #include "core/tgModel.h"
@@ -39,6 +39,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 /**
  * The entry point.
@@ -53,9 +56,16 @@ int main(int argc, char** argv)
     // passed in.
     if (argv[1] == NULL)
     {
-      std::cout<< "TAMLSim.cpp, line 56"<<std::endl;
-      throw std::invalid_argument("No arguments passed in to the application. You need to specify which YAML file you wouldd like to build.");
+      std::cout<< "DropTheCube.cpp, line 56"<<std::endl;
+      throw std::invalid_argument("No arguments passed in to the application. You need to specify which YAML file you would like to build, followed by the x, y, and z coordinate desired of the cube.");
     }
+    if( argc < 5 ) {
+      std::cout<< "DropTheCube.cpp, line 60"<<std::endl;
+      throw std::invalid_argument("Not enough arguments passed in to the application. You need to specify which YAML file you would like to build, followed by the x, y, and z coordinate desired of the cube.");
+    }
+    double x_coord = atof(argv[2]);
+    double z_coord = atof(argv[3]);
+    double y_coord = atof(argv[4]);
   
     // create the ground and world. Specify ground rotation in radians
     const double yaw = 0.0;
@@ -86,7 +96,7 @@ int main(int argc, char** argv)
     // This is a controller that interacts with a generic TensegrityModel as
     // built by the TensegrityModel file.
 
-    // Parameters for the BallDropperYAML are specified in that .h file,
+    // Parameters for the InverseKinematics are specified in that .h file,
     // repeated here:
     double startTime = 5.0;
     double minTension = 1;
@@ -100,7 +110,7 @@ int main(int argc, char** argv)
     //lengthenTags.push_back("cube_string");
     
     // Create the controller
-    BallDropperYAML* const myController = new BallDropperYAML( startTime, minTension, rate, angleOfTravel);
+    InverseKinematics* const myController = new InverseKinematics( startTime, minTension, rate, angleOfTravel, x_coord, y_coord, z_coord);
     // FILL IN 6.6 HERE
     // FILL_IN* const myController = new FILL_IN(startTime, minLength, rate, tagsToControl);
     

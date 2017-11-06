@@ -21,7 +21,7 @@
 
 /**
  * @file HorizontalSpineController.h
- * @brief Contains the definition of class BallDropperYAML
+ * @brief Contains the definition of class InverseKinematics
  * @author Drew Sabelhaus
  * $Id$
  */
@@ -77,13 +77,17 @@
 
 
 #define GRAVITY 98.1
-#define PAYLOAD_MASS 10000 // 0.001 kg (to work with YAML density)
+#define PAYLOAD_MASS 20 // 0.001 kg (to work with YAML density)
 // #define PAYLOAD_MASS 10 // kg's (original units)
 #define ROD_MASS 6
 #define NUM_CABLES 12
 #define CROWS 12
 #define CCOLS 13
 #define MIN_RL 0.5
+
+// printing progress messages
+#define VERBOSE false
+
 using namespace std;
 using namespace boost::numeric;
 
@@ -97,7 +101,7 @@ typedef ublas::vector<double> myVec;
  * A controller to apply the length change in the cables of the 3-bar example
  * model, for the NTRT Introduction Seminar on 2016-09-28 in BEST.
  */
-class BallDropperYAML : public tgObserver<TensegrityModel>, public tgSubject<BallDropperYAML>
+class InverseKinematics : public tgObserver<TensegrityModel>, public tgSubject<InverseKinematics>
 {
 public:
 	
@@ -115,13 +119,13 @@ public:
    * cables upon which to act. All the cables which have a tag in this list of tags
    * will be acted upon by this controller.
    */
-  BallDropperYAML(double startTime, double minTension, double rate,
-			    double angle);
+  InverseKinematics(double startTime, double minTension, double rate,
+			    double angle, double, double, double);
     
   /**
    * Nothing to delete, destructor must be virtual
    */
-  virtual ~BallDropperYAML() { 
+  virtual ~InverseKinematics() { 
   }
 
 
@@ -156,10 +160,6 @@ public:
   /**
    */
   myVec proj( myVec, myVec );
-
-  /**
-   */
-  pair<myMat, myMat> grammyDecomp( myMat );
 
   /**
    */
@@ -214,7 +214,7 @@ protected:
    * use inverse kinematics to find the necessary adjustment to the cables
    * lengths
    */
-  void inverseKin( myVec targetActualLengths, int C[12][13], int Crows, int Ccols, double springConstant, vector<btVector3*> nodes, btVector3 target );
+  myVec inverseKin( myVec targetActualLengths, int C[12][13], int Crows, int Ccols, double springConstant, vector<btVector3*> nodes, btVector3 target );
 
 private:
 	
@@ -225,6 +225,9 @@ private:
   double minTension;
   double rate;
   double angleOfTravel;
+  double cubeXOffset;
+  double cubeYOffset;
+  double cubeZOffset;
   std::vector<tgBasicActuator*> cables;
   std::vector<btVector3> desiredCableDirections = std::vector<btVector3>();
   std::vector<tgRod*> rods;
@@ -269,10 +272,12 @@ private:
   std::string const RODS[6] = {"rod_1", "rod_2", "rod_3", "rod_4", "rod_5",
     "rod_6"};
   std::string const CUBE = "super_cube";
-  double springConstant = 1.0/613.0; // TODO: assuming K = 1/stiffness. check this.
+  double springConstant = 613.0; // TODO: assuming K = stiffness
+  //1.0/613.0; // TODO: assuming K = 1/stiffness. check this.
   myVec targetLengths = myVec(NUM_CABLES);
   myVec targetRLengths = myVec(targetLengths.size());
   btVector3 relativeCubeTarget;
+  btVector3 ballCenter;
   btVector3* middle;
   //still unsure of units and unsure if ntrt even has the correct cable
   //stiffness for our cables

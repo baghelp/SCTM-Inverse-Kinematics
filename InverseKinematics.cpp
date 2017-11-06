@@ -17,14 +17,14 @@
  */
 
 /**
- * @file BallDropperYAML.cpp
- * @brief Implementation of BallDropperYAML.
+ * @file InverseKinematics.cpp
+ * @brief Implementation of InverseKinematics.
  * @author Drew Sabelhaus
  * $Id$
  */
 
 // This module
-#include "BallDropperYAML.h"
+#include "InverseKinematics.h"
 // // This application
 // #include "yamlbuilder/TensegrityModel.h"
 // // This library
@@ -56,10 +56,13 @@ using namespace arma;
 // Constructor assigns variables, does some simple sanity checks.
 // Also, initializes the accumulator variable timePassed so that it can
 // be incremented in onStep.
-BallDropperYAML::BallDropperYAML(double startTime,
+InverseKinematics::InverseKinematics(double startTime,
 		double minTension,
 		double rate,
-		double angleOfTravel) {
+		double angleOfTravel,
+    double x_coord,
+    double y_coord,
+    double z_coord ) {
 	//vector<string> rods,
 	//vector<string> strings) :
 	// startTime(startTime),
@@ -73,6 +76,9 @@ BallDropperYAML::BallDropperYAML(double startTime,
 	this->rate = rate;
 	this->angleOfTravel = angleOfTravel;
 	this->timePassed =  0.0;
+  cubeXOffset = x_coord;
+  cubeYOffset = y_coord;
+  cubeZOffset = z_coord;
 	// start time must be greater than or equal to zero
 	if( startTime < 0.0 ) {
 		throw invalid_argument("Start time must be greater than or equal to zero.");
@@ -93,7 +99,7 @@ BallDropperYAML::BallDropperYAML(double startTime,
  * The initializeActuators method is called in onSetup to fill the cables and
  * rods arrays, as well as store the initial rest lengths in the initialRL map.
  */
-void BallDropperYAML::initializeStructure( TensegrityModel& subject ) {
+void InverseKinematics::initializeStructure( TensegrityModel& subject ) {
 	//DEBUGGING
 	// Pick out the actuators and rods by tag
 	cube.erase(cube.begin(), cube.end());
@@ -130,9 +136,11 @@ void BallDropperYAML::initializeStructure( TensegrityModel& subject ) {
  * which means just store pointers to them and record their rest lengths.
  * This method calls the helper initializeActuators.
  */
-void BallDropperYAML::onSetup( TensegrityModel& subject )
+void InverseKinematics::onSetup( TensegrityModel& subject )
 {
-	cout << "Setting up the BallDropperYAML controller." << endl;
+  if(VERBOSE) {
+    cout << "Setting up the InverseKinematics controller." << endl;
+  }
 	//	    << "Finding cables with tags: " << lengthen
 	//	    << endl;
 	//lengthen_vector = {};
@@ -140,12 +148,14 @@ void BallDropperYAML::onSetup( TensegrityModel& subject )
 	initializeStructure( subject );
 	initializeController();
 	// For all the strings in the list, call initializeActuators.
-	cout << "Finished setting up the controller." << endl;    
+  if(VERBOSE){
+    cout << "Finished setting up the controller." << endl;    
+  }
 
 }
 
 
-void BallDropperYAML::moveTheBall( double x, double y, double z ) {
+void InverseKinematics::moveTheBall( double x, double y, double z ) {
 	// 1.create connectivity matrix, calling from and to to get points and stuff
 	int rodsAndCables = 12 + 6;
 	int nodes = 12 + 12;
@@ -157,7 +167,7 @@ void BallDropperYAML::moveTheBall( double x, double y, double z ) {
 //  * orientation, and the length, and then calculates and returns the current
 //  * rod end points
 //  |)}>#
-// pair< btVector3*, btVector3* > BallDropperYAML::getEnds( tgBaseRigid* member ) {
+// pair< btVector3*, btVector3* > InverseKinematics::getEnds( tgBaseRigid* member ) {
 //   //still borken
 //   // if( typeof(member) == tgRod* ) {
 //   //   member
@@ -200,8 +210,10 @@ void BallDropperYAML::moveTheBall( double x, double y, double z ) {
 /* initialize displacement vectors, and set the value of the global
  * "relativeCubeTarget" (which is taken relative to the center of the superball
  */
-void BallDropperYAML::initializeController() {
-  cout<< "initializing Controller"<<endl;
+void InverseKinematics::initializeController() {
+  if(VERBOSE){
+    cout<< "initializing Controller"<<endl;
+  }
 
   
   // These are really ugly, hardcoded like this, but we don't know how to get
@@ -236,13 +248,15 @@ void BallDropperYAML::initializeController() {
   //     move       alllll      Assign location here
 	//          (camera right) (away from ground) (away from camera)       
   // middle = (0. 8.42, 0);
-	relativeCubeTarget = btVector3( btScalar(0), btScalar(0), btScalar(0) );
+	// relativeCubeTarget = btVector3( btScalar(0), btScalar(7), btScalar(0) );
 
-  cout<< "finished initializing Controller"<<endl;
+  if(VERBOSE){
+    cout<< "finished initializing Controller"<<endl;
+  }
 }
 
 
-void BallDropperYAML::inverseKin( myVec targetActualLengths, int C[12][13], int Crows, int Ccols, double springConstant, vector<btVector3*> nodes, btVector3 target){
+myVec InverseKinematics::inverseKin( myVec targetRLengths, int C[12][13], int Crows, int Ccols, double springConstant, vector<btVector3*> nodes, btVector3 target){
 
 	Connectivity = ublas::matrix<double>(Crows, Ccols);
 	for( int row = 0; row < Crows; row++ ) {
@@ -258,16 +272,16 @@ void BallDropperYAML::inverseKin( myVec targetActualLengths, int C[12][13], int 
 	myVec z = myVec(nodes.size() );
 	for( int i = 0; i < cables.size(); i++ ) {
 		x(i) = nodes[i]->getX();
-		y(i) = nodes[i]->getY();
-		z(i) = nodes[i]->getZ();
+		y(i) = nodes[i]->getZ(); // permute Z and Y, because of yaml file format
+		z(i) = nodes[i]->getY();
 	}
   // "x" = right positive, zero is middle
   // "y" = vertical positive, zero is ground
   // "z" = away from camera positive, zero is middle
   // add middle to offsets to get absolute location
-	x(x.size()-1) = target.getX() + 0; // -1 because zero indexed
-	y(y.size()-1) = target.getY() + 8.42;
-	z(z.size()-1) = target.getZ() + 0;
+	x(x.size()-1) = target.getX() + ballCenter.getX(); // -1 because zero indexed
+	y(y.size()-1) = target.getZ() + ballCenter.getZ();
+	z(z.size()-1) = target.getY() + ballCenter.getY();
   // btVector3 relativeCubeTarget = btVector3(-8.42,0,0);
   // order of nodes:
   //  dist horiz left
@@ -309,11 +323,13 @@ void BallDropperYAML::inverseKin( myVec targetActualLengths, int C[12][13], int 
 		ublas::row(A, i + 2*temp1.size1() ) = ublas::row(temp3, i);
 	}
 
-  cout<< "A: "<<endl;
-  for( int i = 0; i < A.size1(); i++ ) {
-    cout<< ublas::row(A,i)<<endl;
+  if(VERBOSE){
+    cout<< "A: "<<endl;
+    for( int i = 0; i < A.size1(); i++ ) {
+      cout<< ublas::row(A,i)<<endl;
+    }
+    cout<<endl;
   }
-  cout<<endl;
 
 	// // print A (for debugging)
 	// cout<<endl;
@@ -337,24 +353,28 @@ void BallDropperYAML::inverseKin( myVec targetActualLengths, int C[12][13], int 
 	}
 
 
-  cout<< "going to do armadillo stuff"<<endl;
-  // build armadillo matrix so we can use its qr decomp
-  mat A_temp = mat(A.size1(), A.size2() );
+  if(VERBOSE){
+    cout<< "going to do armadillo stuff"<<endl;
+  }
+  // build armadillo matrix so we can use its inverse
+  mat A_arma = mat(A.size1(), A.size2() );
   for( int row = 0; row < A.size1(); row++ ) {
     for( int col = 0; col < A.size2(); col++ ) {
-      A_temp(row, col) = A(row, col);
+      A_arma(row, col) = A(row, col);
     }
   }
 
-  mat A_temp_dag = pinv(A_temp);
-  cout<< "A_temp size = "<<size(A_temp)<<endl;
-  cout<< "A_dag size = "<<size(A_temp_dag)<<endl;
+  mat A_arma_inv = pinv(A_arma);
+  if(VERBOSE){
+    cout<< "A_arma size = "<<size(A_arma)<<endl;
+    cout<< "A_dag size = "<<size(A_arma_inv)<<endl;
+  }
 
   // Convert from armadillo-friendly matrix to our default matrix format
-	myMat A_dag = myMat(A_temp_dag.n_rows, A_temp_dag.n_cols, false);
-  for( int row = 0; row < A_temp_dag.n_rows; row++ ) {
-    for( int col = 0; col < A_temp_dag.n_cols; col++ ) {
-      A_dag(row, col) = A_temp_dag(row, col);
+	myMat A_dag = myMat(A_arma_inv.n_rows, A_arma_inv.n_cols, false);
+  for( int row = 0; row < A_arma_inv.n_rows; row++ ) {
+    for( int col = 0; col < A_arma_inv.n_cols; col++ ) {
+      A_dag(row, col) = A_arma_inv(row, col);
     }
   }
   // cout<< "Q*R - A: " <<prod( Q, R ) - A<<endl<<endl;
@@ -422,6 +442,19 @@ void BallDropperYAML::inverseKin( myVec targetActualLengths, int C[12][13], int 
   // cout<< p<<endl;
   // cout<<endl;
 
+	// myVec w = findW( V, A_dag_s, p);
+  mat A_null_arma = null(A_arma); // this is a 12x0 right now! :(
+  cout<< "A_null_arma:"<<A_null_arma<<endl;
+  cout<< "A_arma:"<<A_arma<<endl;
+
+  myMat A_null = myMat(A_null_arma.n_rows, A_null_arma.n_cols);
+	for( int row = 0; row < A_null_arma.n_rows; row++ ) {
+		for( int col = 0; col < A_null_arma.n_cols; col++ ) {
+			A_null(row, col) = A_null_arma(row, col);
+		}
+	}
+	// myVec w = findW( A_null, A_dag_s, p); // TODO: nullspace doesn't work, A's
+  // nullspace is empty
 	myVec w = findW( V, A_dag_s, p);
 
 
@@ -453,20 +486,60 @@ void BallDropperYAML::inverseKin( myVec targetActualLengths, int C[12][13], int 
 	// cout<< "q size: " << q.size() <<endl;
 	myVec first_half = prod(A_dag, p);
   cout<<"naive force densities:"<<first_half<<endl;
-
-  for( int i = 0; i < NUM_CABLES+1; i++ ) {
-    cout<<"node "<< i <<" location: "<< *(nodes[i]) <<endl;
+  if(VERBOSE){
+    cout<<"naive force densities:"<<first_half<<endl;
+    for( int i = 0; i < NUM_CABLES+1; i++ ) {
+      cout<<"node "<< i <<" location: "<< *(nodes[i]) <<endl;
+    }
   }
+
+
+
 
 	myVec sec_half = prod( I_sr - prod(A_dag, A), w);
 	// cout<< "first half of (8) " <<first_half<<endl;
 	// cout<< "second half of (8) " <<sec_half <<endl;
 	q = prod(A_dag, p) + prod( I_sr - prod(A_dag, A), w);
-  for( int i = 0; i < q.size() ; i++ ) {
-    q(i) = round(q(i));
+  // cout<<"\nA:"<<endl;
+  // for( int i = 0; i < A.size1(); i++ ) {
+  //   cout<< ublas::row(A,i)<<endl;
+  // }
+  cout<<"\nA_dag*A:"<<endl;
+  for( int i = 0; i < prod(A_dag, A).size1(); i++ ) {
+    cout<< ublas::row(prod(A_dag, A),i)<<endl;
   }
+  // cout<<endl;
+  // for( int i = 0; i < q.size() ; i++ ) {
+  //   q(i) = round(q(i));
+  // }
+
+
+  // temporary: // TODO: this is just so things kindof work
+  q = prod(A_dag, p);
+  // find most negative force density
+  double minValue = 0;
+  for(  int i = 0; i < q.size(); i++ ) {
+    if( q(i) < minValue ) {
+      minValue = q(i);
+    }
+  }
+  // offset q by most negative value
+  for(  int i = 0; i < q.size(); i++ ) {
+    q(i) += -minValue + 5; // not ideal, but it works surprisingly well
+  }
+  cout<< "adjusted q"<<q<<endl;
+  if(VERBOSE) {
+    cout<< "adjusted q"<<q<<endl;
+    cout<< endl<<"initial targetRLengths:"<<targetRLengths<<endl<<endl;
+  }
+  for( int i = 0; i < targetRLengths.size(); i++ ) {
+    targetRLengths(i) = targetRLengths(i) - targetRLengths(i)*q(i)/springConstant;
+  }
+  // if(VERBOSE) {
+    cout<< "final targetRLengths:" << targetRLengths<<endl;
+  // }
   // cout<< endl<<"q:"<<q<<endl<<endl;
-	// cout<< q<<endl;
+	// cout<< "q:"<<q<<endl;
 	// cout<< "A*q - p: " << prod(A, q) - p<<endl<<endl;;
 	// cout<< "p: " << p <<endl;
 
@@ -482,7 +555,7 @@ void BallDropperYAML::inverseKin( myVec targetActualLengths, int C[12][13], int 
 
 
 
-	return;
+	return targetRLengths;
 	// take a position target
 	//
 	// Calculate forces in the cables to place node 13 at target
@@ -497,7 +570,7 @@ void BallDropperYAML::inverseKin( myVec targetActualLengths, int C[12][13], int 
 
 
 
-btVector3 BallDropperYAML::getSuperballCenter() {
+btVector3 InverseKinematics::getSuperballCenter() {
   btVector3 center = btVector3();
   for( int i = 0; i < cables.size(); i++ ) {
     center += (*(nodes[i]))/( (double) cables.size() );
@@ -507,7 +580,7 @@ btVector3 BallDropperYAML::getSuperballCenter() {
 
 
 
-myVec BallDropperYAML::findW(myMat V, myMat A_dag_s, myVec forces ) {
+myVec InverseKinematics::findW(myMat V, myMat A_dag_s, myVec forces ) {
   // cout<< "V: "<<endl;
   // for( int i = 0; i < V.size1(); i++ ) {
   //   cout<< ublas::row(V,i)<<endl;
@@ -533,6 +606,7 @@ myVec BallDropperYAML::findW(myMat V, myMat A_dag_s, myVec forces ) {
 	myMat temp = prod(trans(V),V);
 	n = temp.size1();
 	m = temp.size2();
+  cout<< "size of G:"<< n<<"x"<<m<<endl;
 	G.resize(n, m);
 	{
 		for (int row = 0; row < n; row++)	{
@@ -602,9 +676,9 @@ myVec BallDropperYAML::findW(myMat V, myMat A_dag_s, myVec forces ) {
 
 	x.resize(n);
 
-	std::cout << "f: " << solve_quadprog(G, g0, CE, ce0, CI, ci0, x) << std::endl;
-	// std::cout << "f: " << solve_quadprog(G, g0, CI, ci0, x) << std::endl;
-	std::cout << "x: " << x << std::endl;
+  std::cout << "f: " << solve_quadprog(G, g0, CE, ce0, CI, ci0, x) << std::endl;
+    // std::cout << "f: " << solve_quadprog(G, g0, CI, ci0, x) << std::endl;
+    // std::cout << "x: " << x << std::endl;
 	// Debugging
 	// for (int i = 0; i < n; i++)
 	//   std::cout << x[i] << ' ';
@@ -653,7 +727,7 @@ myVec BallDropperYAML::findW(myMat V, myMat A_dag_s, myVec forces ) {
 
 /**
 */
-//BallDropperYAML::rotate( btVector3* pt, btVector3* euler angles)
+//InverseKinematics::rotate( btVector3* pt, btVector3* euler angles)
 
 
 
@@ -663,14 +737,25 @@ myVec BallDropperYAML::findW(myMat V, myMat A_dag_s, myVec forces ) {
  * point
  * @input
  */
-void BallDropperYAML::updateRLengths( btVector3 relativeCubeTarget ) {
-  cout<< "updating RLengths"<<endl;
-  cout<<"target: "<<relativeCubeTarget<<endl;
+void InverseKinematics::updateRLengths( btVector3 relativeCubeTarget ) {
+  updateNodes();
+  if(VERBOSE){
+    cout<< "updating RLengths"<<endl;
+    cout<<"target: "<<relativeCubeTarget<<endl;
+  }
+
+  // convert the relative target to an absolute position
+  ballCenter = btVector3();
+  for( int i = 0; i < NUM_CABLES; i++ ) { // TODO: if we add more bars, this needs to be changed so it includes everything that isn't a part of the cube
+    ballCenter += *(nodes[i]);
+  }
+  ballCenter /= NUM_CABLES;
+  btVector3 absoluteTarget = relativeCubeTarget + ballCenter;
 
   /////////// using the center as one node /////////
 	for( int i = 0; i < cables.size(); i++) {
-		targetLengths(i) = (*(nodes[i]) - relativeCubeTarget).norm();
-		desiredCableDirections.push_back( relativeCubeTarget - *(nodes[i]) );
+		targetLengths(i) = (*(nodes[i]) - absoluteTarget).norm();
+		desiredCableDirections.push_back( absoluteTarget - *(nodes[i]) );
     desiredCableDirections[i].normalize();
 		//cout<< cables[i]->toString() <<endl;
     targetRLengths(i) = targetLengths(i);// - 4.5;
@@ -678,7 +763,9 @@ void BallDropperYAML::updateRLengths( btVector3 relativeCubeTarget ) {
     //   targetRLengths(i) = MIN_RL;
     // }
     // cout<<" targetLength1 : "<<
-    cout<< "uncorrected RLength "<<i<<": "<< targetRLengths(i)<<endl;
+    if(VERBOSE){
+      cout<< "uncorrected RLength "<<i<<": "<< targetRLengths(i)<<endl;
+    }
 	}
   
 
@@ -732,33 +819,52 @@ void BallDropperYAML::updateRLengths( btVector3 relativeCubeTarget ) {
   // cout<< "desired cable direction 1 : "<< desiredCableDirections[1]<<endl;
   // // cout<< "target: "<< target<<endl;
   // cout<< "updateRLengths thinks the cube will be at: "<< *nodes[1] + targetLengths(1)*desiredCableDirections[1] <<endl;
-  cout<< "finished updating RLengths"<<endl;
+  if(VERBOSE){
+    cout<< "finished updating RLengths"<<endl;
+  }
   // return targetRLengths;
 }
 
 
-void BallDropperYAML::updateNodes() {
+void InverseKinematics::updateNodes() {
  nodes.erase(nodes.begin(), nodes.end() );
   //for each rod in the RODS, add its end points to the nodes vector
   for( size_t i = 0; i < rods.size(); i++ ) {
     pair< btVector3*, btVector3* > endPoints = rods[i]->ends();
-    nodes.insert( nodes.begin(), endPoints.first );
-    nodes.insert( nodes.begin(), endPoints.second );
+    nodes.push_back(endPoints.first);//insert( nodes.begin(), endPoints.first );
+    nodes.push_back(endPoints.second);
+    // nodes.insert( nodes.begin(), endPoints.first );
+    // nodes.insert( nodes.begin(), endPoints.second );
   }
   // order of nodes:
-  //  dist horiz right
-  //  dist horiz left
-  //  prox horiz right
-  //  prox horiz left
-  //  top horiz dist
-  //  top horiz prox
-  //  bott horiz dist
-  //  bott horiz prox
-  //  right vert top
-  //  right ver bott
-  //  left vert top
-  //  left vert bott
-  //  middle
+  // dist_horiz_left
+  // dist_horiz_right
+  // prox_boriz_left
+  // prox_horiz_right
+  // top_horiz_prox
+  // top_horiz_dist
+  // bott_horiz_prox
+  // bott_horiz_dist
+  // right_vert_bott
+  // right_vert_top
+  // left_vert_bott
+  // left_vert_top
+  // middle
+  //
+     //  --- Deprecated --- //
+     // left vert bott
+     // left vert top
+     // right ver bott
+     // right vert top
+     // bott horiz prox
+     // bott horiz dist
+     // top horiz prox
+     // top horiz dist
+     // prox horiz left
+     // prox horiz right
+     // dist horiz left
+     // dist horiz right
+     // middle
 
   //add the middle of the cube to the nodes vector
   btVector3 top = *(cube[0]->ends().first);
@@ -777,24 +883,21 @@ void BallDropperYAML::updateNodes() {
 /* old playing around-thing, tightens some cables and lengthens others.
  * maintains a min tension as well
  */
-void BallDropperYAML::onStep(TensegrityModel& subject, double dt)
+void InverseKinematics::onStep(TensegrityModel& subject, double dt)
 {
 	double nextRestLength;
 	double currRestLength;
 	double minRestLength;
 	timePassed += dt;
-  btVector3 relativeCubeTarget = btVector3(0,8,0);
+  btVector3 relativeCubeTarget = btVector3(cubeXOffset,cubeYOffset,cubeZOffset);
 
 
-  if( timePassed < 2*dt){
+  // if( timePassed < 2*dt){
 
-
-
+	if( true ){//timePassed < 3*dt ) {
   updateRLengths( relativeCubeTarget ); // updates targetRLengths
-  inverseKin( targetRLengths, C, CROWS, CCOLS, springConstant, nodes, relativeCubeTarget );
-  return;
+  targetRLengths = inverseKin( targetRLengths, C, CROWS, CCOLS, springConstant, nodes, relativeCubeTarget );
 
-	// if( timePassed < 2*dt ) {
 	//   cout<< "current lengths: ";
 	//   for( int i = 0; i < NUM_CABLES; i ++ ) {
 	//     cout<< cables[i]->getCurrentLength() << ", ";
@@ -806,18 +909,40 @@ void BallDropperYAML::onStep(TensegrityModel& subject, double dt)
 	//   }
 	//     cout<<endl;
 	// }
-	if( timePassed > startTime*2.0/7.0 ) {
+  // targetRLengths(8) = 0.5;
+  // cable order:
+  // dist_horiz_right
+  // dist_horiz_left
+  // prox_horiz_right
+  // prox_horiz_left
+  //
+  //
+  //
+	// if( timePassed > startTime*2.0/7.0 ) {
     // cout<< "targetLengths: "<<targetRLengths<<endl;
 		for( int i = 0; i < NUM_CABLES; i ++ ) {
-			cables[i]->setControlInput(targetRLengths(i), 0.001*dt);
+			cables[i]->setControlInput(targetRLengths(i), dt);// 0.001*dt);
 		}
 	}
-  if( (int) (timePassed/dt) % 10000 == 0 ) {
+	if( false  ) {
     // cout<<"here"<<endl;
     // cout<< "middle:"<<(*nodes.back())<<endl;
     // cout<< "updateRLengths thinks node 1 is at: "<< *nodes[1]<<endl;
-    // cout<< endl<<"rLengths called: "<<targetRLengths<<endl<<endl;
-  }
+    cout<< endl<<"rLengths called: "<<targetRLengths<<endl;
+	  cout<< "current rest lengths: ";
+	  for( int i = 0; i < NUM_CABLES; i ++ ) {
+	    cout<< cables[i]->getRestLength() << ", ";
+	  }
+    cout<<endl;
+
+	  for( int i = 0; i < nodes.size(); i ++ ) {
+	    cout<< "node "<<i<<": "<<*(nodes[i]) <<endl;
+	  }
+    return;
+  } //TODO: temp
+
+  // TODO:temporary
+  //return;
 	// if( timePassed > startTime ) {
 	//   // if enough time has passed, actuate cables
 	//   for (size_t i = 0; i < shorten_vector.size(); i ++) {	
@@ -861,16 +986,19 @@ void BallDropperYAML::onStep(TensegrityModel& subject, double dt)
 	//
 	//   }   
 	// }
-  }
+  // }
 }
 
 
 
 /* ////////////// Cost Minimization /////////// */
 
-double BallDropperYAML::cost(myMat V, myVec w, myMat A_dag_s, myVec p ) {
-  if( ( prod(A_dag_s, p) + prod( V, w ) )(0) < 0 ) {
-    cout<< endl<< "Inputted matrices do not meet constraints! (w = " <<w <<")."<<endl<<endl;
+double InverseKinematics::cost(myMat V, myVec w, myMat A_dag_s, myVec p ) {
+  if(VERBOSE){
+    if( ( prod(A_dag_s, p) + prod( V, w ) )(0) < 0 ) {
+      cout<< endl<< "Inputted matrices do not meet constraints! (w = " <<
+        w <<")."<<endl<<endl;
+    }
   }
   // double cost = prod( prod( trans( w ), trans( V ) ), prod( V, w ) ) +  
   //   2 * prod( prod( trans( w ), trans( V ) ), prod( A_dag_s, p ) );
@@ -893,7 +1021,7 @@ double BallDropperYAML::cost(myMat V, myVec w, myMat A_dag_s, myVec p ) {
 
 /* make a diagonal matrix out of a vector
 */
-myMat BallDropperYAML::diag( myVec inVec ) {
+myMat InverseKinematics::diag( myVec inVec ) {
 
 	myMat diagonal = myMat( inVec.size(), inVec.size() );
 
@@ -911,49 +1039,13 @@ myMat BallDropperYAML::diag( myVec inVec ) {
 
 /* Find the projection of vector a onto vetor e
 */
-myVec BallDropperYAML::proj(myVec a, myVec e) { // projection of vector A onto e
+myVec InverseKinematics::proj(myVec a, myVec e) { // projection of vector A onto e
 	myVec result = e*( inner_prod(e, a) / (inner_prod(e, e) ) );
 	return result;
 }
 
 
-pair<myMat, myMat> BallDropperYAML::grammyDecomp( myMat A ) {
-	cout<< "intput to decomp: " << A <<endl;
-	myMat U = myMat(A.size1(), A.size2() );
-	myMat E = myMat(A.size1(), A.size2() );
-
-	// cout<< "loops ends when col = " << A.size2()
-	for( int col = 0; col < A.size2(); col++ ) {
-
-		for( int j = 0; j < col; j++ ) {
-			// cout<< "j is "<<j<< endl;
-			// cout<< "col is "<<col<< endl;
-			ublas::column(U, col) -= proj( ublas::column(A, col), ublas::column(U, j));
-			// cout<< "proj works"<<endl;
-		}
-
-		ublas::column(E, col) = ublas::column(U, col) / norm_2( ublas::column(U, col) );
-	}
-	myMat Q = E;
-	myMat R = prod(ublas::trans(Q),A);
-  for( int index = 0; index < R.size1(); index++ ) {
-    assert( index < R.size2());
-    assert(R(index, index) != 0);
-    // if( R(index,index) == 0 ) {
-    //   cout<< "Oh no! You LOSER! R is not invertible!!!"<<endl;
-    // }
-  }
-	// cout<< "U: " <<U << endl;
-	// cout<< "Q: " <<Q << endl;
-  cout<<endl;
-	cout<< "R: " <<R << endl;
-  cout<<endl;
-  cout<< "finished gramm-Schmidtt decomp"<<endl;
-	return pair<myMat, myMat>(Q, R);
-}
-
-
-bool BallDropperYAML::InvertMatrix(const myMat* input, myMat* inverse)
+bool InverseKinematics::InvertMatrix(const myMat* input, myMat* inverse)
 {
 	typedef ublas::permutation_matrix<std::size_t> pmatrix;
 
